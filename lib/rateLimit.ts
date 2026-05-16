@@ -8,7 +8,11 @@ type RateLimitEntry = {
 
 const store = new Map<string, RateLimitEntry>();
 
-export function rateLimit(ip: string, maxRequests: number, windowSeconds: number): boolean {
+export function rateLimit(
+  ip: string,
+  maxRequests: number,
+  windowSeconds: number
+): boolean {
   const now = Date.now();
   const entry = store.get(ip);
 
@@ -17,6 +21,7 @@ export function rateLimit(ip: string, maxRequests: number, windowSeconds: number
     if (entry.count >= maxRequests) {
       return false; // Rate limited
     }
+
     entry.count += 1;
     store.set(ip, entry);
     return true;
@@ -34,9 +39,10 @@ export function rateLimit(ip: string, maxRequests: number, windowSeconds: number
 // Cleanup interval to prevent memory leaks in long-running processes
 setInterval(() => {
   const now = Date.now();
-  for (const [ip, entry] of store.entries()) {
+
+  for (const [ip, entry] of Array.from(store.entries())) {
     if (entry.resetTime <= now) {
       store.delete(ip);
     }
   }
-}, 60000); // Clean up every minute
+}, 60000);
